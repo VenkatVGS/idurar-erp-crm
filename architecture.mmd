@@ -1,0 +1,63 @@
+graph TB
+    subgraph AWS["AWS ap-south-1"]
+        subgraph VPC["VPC: 10.0.0.0/16"]
+            subgraph PublicSubnets["Public Subnets"]
+                IGW["Internet Gateway"]
+                NAT1["NAT Gateway AZ1"]
+                NAT2["NAT Gateway AZ2"]
+            end
+            
+            subgraph PrivateSubnets["Private Subnets"]
+                subgraph EKS["EKS Cluster - idurar-erp-cluster"]
+                    subgraph IstioNS["istio-system Namespace"]
+                        Istiod["Istiod Control Plane"]
+                    end
+                    subgraph IngressNS["istio-ingress Namespace"]
+                        IngressGW["Istio Ingress Gateway"]
+                    end
+                    subgraph AppNS["Application Namespace"]
+                        BackendPod["Backend Pod"]
+                        FrontendPod["Frontend Pod"]
+                    end
+                end
+                
+                subgraph DatabaseLayer["Database Layer"]
+                    RDS["RDS PostgreSQL<br/>idurar-erp-postgres<br/>Multi-AZ"]
+                    Redis["ElastiCache Redis<br/>idurar-erp-redis"]
+                end
+            end
+        end
+        
+        subgraph Storage["Storage & Security"]
+            S3State["S3: Terraform State<br/>Versioning + Encryption"]
+            S3Assets["S3: Static Assets<br/>Versioning + Encryption"]
+            KMS["KMS Keys<br/>RDS, EBS, S3 Encryption"]
+        end
+    end
+    
+    User["End User"] --> IGW
+    IGW --> IngressGW
+    IngressGW --> BackendPod
+    IngressGW --> FrontendPod
+    
+    BackendPod --> RDS
+    BackendPod --> Redis
+    FrontendPod --> BackendPod
+    
+    RDS -.->|Multi-AZ Sync| RDSReplica["RDS Replica AZ2"]
+    
+    EKS -.-> S3State
+    EKS -.-> S3Assets
+    KMS -.-> RDS
+    KMS -.-> S3State
+    KMS -.-> S3Assets
+    
+    classDef database fill:#e1f5fe
+    classDef compute fill:#f3e5f5
+    classDef storage fill:#e8f5e8
+    classDef network fill:#fff3e0
+    
+    class RDS,Redis database
+    class EKS,Istiod,IngressGW,BackendPod,FrontendPod compute
+    class S3State,S3Assets,KMS storage
+    class VPC,PublicSubnets,PrivateSubnets,IGW,NAT1,NAT2 network
