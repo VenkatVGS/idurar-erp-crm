@@ -41,7 +41,7 @@ jobs:
   build-push:
     needs: code-quality
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     
     steps:
       - name: Checkout code
@@ -81,7 +81,7 @@ jobs:
   terraform-apply:
     needs: build-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     
     steps:
       - name: Checkout code
@@ -110,7 +110,7 @@ jobs:
   deploy-to-eks:
     needs: terraform-apply
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     
     steps:
       - name: Checkout code
