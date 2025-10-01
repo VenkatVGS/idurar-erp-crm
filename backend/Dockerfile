@@ -17,7 +17,7 @@ COPY . .
 RUN npx prisma generate
 
 # Build TypeScript code
-RUN npm run build
+#RUN npm run build
 
 # Stage 2: Production image
 FROM node:20-alpine
