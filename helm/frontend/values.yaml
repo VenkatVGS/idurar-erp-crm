@@ -11,7 +11,7 @@ service:
   targetPort: 3000
 
 istio:
-  enabled: true
+  enabled: false
   virtualService:
     hosts:
     - "idurar.example.com"
@@ -30,7 +30,7 @@ resources:
     cpu: "250m"
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
@@ -39,6 +39,6 @@ env:
   REACT_APP_API_URL: "http://backend:5000"
 
 cloudwatch:
-  enabled: true
+  enabled: false
   logGroup: "/idurar-app/frontend"
   region: ap-south-1
