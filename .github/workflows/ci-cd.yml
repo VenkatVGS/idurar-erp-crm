@@ -10,7 +10,7 @@ env:
   AWS_REGION: ap-south-1
   ECR_BACKEND_REPOSITORY: idurar-erp-crm-backend
   ECR_FRONTEND_REPOSITORY: idurar-erp-crm-frontend
-  EKS_CLUSTER_NAME: idurar-eks-cluster
+  EKS_CLUSTER_NAME: idurar-erp-cluster
   EKS_NAMESPACE: idurar-app
   TF_WORKSPACE: non-prod
 
