@@ -197,7 +197,7 @@ jobs:
             --set image.repository=$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY \
             --set image.tag=${{ github.sha }} \
             --wait \
-            --timeout 10m
+            --timeout 2m
 
       - name: Deploy Frontend with Helm
         env:
@@ -209,7 +209,7 @@ jobs:
             --set image.repository=$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY \
             --set image.tag=${{ github.sha }} \
             --wait \
-            --timeout 10m
+            --timeout 2m
 
       - name: Verify Deployment
         run: |
