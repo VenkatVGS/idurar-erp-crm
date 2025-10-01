@@ -24,7 +24,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      serviceAccountName: {{ include "backend.serviceAccountName" . }}
+      # REMOVE this line: serviceAccountName: {{ include "backend.serviceAccountName" . }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -62,23 +62,3 @@ spec:
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: {{ .Chart.Name }}-hpa
-  namespace: {{ .Release.Namespace }}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {{ .Chart.Name }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
