@@ -12,7 +12,7 @@ RUN npm ci
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy source code and environment files
+# Copy source code
 COPY . .
 
 # Create production .env file with database URL
@@ -22,5 +22,5 @@ RUN echo 'PORT=5000' >> .env
 
 EXPOSE 5000
 
-# Run migrations and start the application
-CMD sh -c "npx prisma db push && npm start"
+# Use npm start instead of node dist/index.js
+CMD ["npm", "start"]
