@@ -1,21 +1,41 @@
-FROM node:20-alpine
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
-COPY prisma ./prisma/
 
-RUN npm install
+# Install dependencies
+RUN npm ci
 
-RUN npx prisma generate
-
+# Copy the rest of the code
 COPY . .
 
-RUN echo 'DATABASE_URL="postgresql://idurar_admin:Venkatesh123!@idurar-erp-postgres.c544weocsbra.ap-south-1.rds.amazonaws.com:5432/idurar"' > .env
-RUN echo 'NODE_ENV=production' >> .env
-RUN echo 'PORT=5000' >> .env
+# Generate Prisma client
+RUN npx prisma generate
 
+# Build TypeScript code
+RUN npm run build
+
+# Stage 2: Production image
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy only production dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy built files and Prisma client from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+
+# Expose application port
 EXPOSE 5000
 
-# Use ts-node to run the TypeScript application
-CMD sh -c "npx prisma db push && npx ts-node src/index.ts"
+# Start the app
+CMD ["node", "dist/index.js"]
