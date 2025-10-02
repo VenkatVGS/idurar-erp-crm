@@ -15,12 +15,15 @@ RUN npx prisma generate
 # Copy source code
 COPY . .
 
-# Create production .env file with database URL
+# Build TypeScript code
+RUN npm run build
+
+# Create production .env file
 RUN echo 'DATABASE_URL="postgresql://idurar_admin:Venkatesh123!@idurar-erp-postgres.c544weocsbra.ap-south-1.rds.amazonaws.com:5432/idurar"' > .env
 RUN echo 'NODE_ENV=production' >> .env
 RUN echo 'PORT=5000' >> .env
 
 EXPOSE 5000
 
-# Use npm start instead of node dist/index.js
-CMD ["npm", "start"]
+# Run migrations and start the application
+CMD sh -c "npx prisma db push && npm start"
