@@ -42,7 +42,7 @@ jobs:
     needs: code-quality
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,7 +82,7 @@ jobs:
     needs: build-push
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -105,15 +105,6 @@ jobs:
             echo "⚠️ Terraform directory not found - skipping Terraform apply"
           fi
 
-      - name: Terraform Apply (if directory exists)
-        if: steps.check_terraform.outputs.terraform_exists == 'true'
-        run: |
-          cd terraform
-          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
-          terraform init
-          terraform plan -out=tfplan
-          terraform apply -auto-approve tfplan
-
       - name: Skip Terraform (directory not found)
         if: steps.check_terraform.outputs.terraform_exists == 'false'
         run: |
@@ -125,7 +116,7 @@ jobs:
     needs: terraform-apply
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -180,12 +171,12 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.get-ecr-registry.outputs.ECR_REGISTRY }}
         run: |
-        echo "Running database migrations..."
-        kubectl run db-migrations -n ${{ env.EKS_NAMESPACE }} \
-          --image=$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:${{ github.sha }} \
-          --env="DATABASE_URL=postgresql://idurar_admin:Venkatesh123!@idurar-erp-postgres.c544weocsbra.ap-south-1.rds.amazonaws.com:5432/idurar" \
-          --rm -i --restart=Never -- \
-          npx prisma db push
+          echo "Running database migrations..."
+          kubectl run db-migrations -n ${{ env.EKS_NAMESPACE }} \
+            --image=$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:${{ github.sha }} \
+            --env="DATABASE_URL=postgresql://idurar_admin:Venkatesh123!@idurar-erp-postgres.c544weocsbra.ap-south-1.rds.amazonaws.com:5432/idurar" \
+            --rm -i --restart=Never -- \
+            npx prisma db push
 
       - name: Deploy Backend with Helm
         env:
@@ -226,7 +217,7 @@ jobs:
     needs: deploy-to-eks
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
-    
+
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -256,13 +247,13 @@ jobs:
           }
           EOF
           )
-          
+
           # Create log stream and send log event
           aws logs create-log-stream \
             --log-group-name "/idurar-app/deployments" \
             --log-stream-name "deploy-${{ github.sha }}" \
             --region $AWS_REGION || echo "Log stream already exists"
-          
+
           aws logs put-log-events \
             --log-group-name "/idurar-app/deployments" \
             --log-stream-name "deploy-${{ github.sha }}" \
